@@ -2,8 +2,6 @@ open Belt
 
 @bs.val external __dirname: string = "__dirname"
 
-let readInput = () => Node.Fs.readFileAsUtf8Sync(__dirname ++ "/input")->Js.String.split("\n", _)
-
 let parse = x => {
   switch x {
   | Some([_, min, max, char, password]) => Some((min, max, char, password))
@@ -15,6 +13,7 @@ module Part01 = {
   let re = %re("/(\d*).(\d*)\s(.):\s(.*)/")
   let make = input => {
     input
+    ->Js.String.split("\n", _)
     ->Array.map(row => Js.String.match_(re, row)->parse)
     ->Array.keepMap(x => x)
     ->Array.map(result => {
@@ -35,15 +34,15 @@ module Part01 = {
     })
     ->Array.keep(x => x == true)
     ->Array.length
+    ->Int.toString
   }
 }
-
-Js.log(readInput()->Part01.make)
 
 module Part02 = {
   let re = %re("/(\d*).(\d*)\s(.):\s(.*)/")
   let make = input => {
     input
+    ->Js.String.split("\n", _)
     ->Array.map(row => Js.String.match_(re, row)->parse)
     ->Array.keepMap(x => x)
     ->Array.map(result => {
@@ -68,7 +67,11 @@ module Part02 = {
     })
     ->Array.keep(x => x == true)
     ->Array.length
+    ->Int.toString
   }
 }
 
-Js.log(readInput()->Part02.make)
+let input = __dirname ++ "/input"
+
+Solution.make(module(Part01), input)
+Solution.make(module(Part02), input)

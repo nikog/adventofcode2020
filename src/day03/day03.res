@@ -4,7 +4,7 @@ module Part01 = {
   let pickTrees = ((trees, _)) => trees
 
   let make = input => {
-    input->Array.reduce((0, 0), ((trees, x), row) => {
+    input->Js.String.split("\n", _)->Array.reduce((0, 0), ((trees, x), row) => {
       let rowArr = Js.String2.split(row, "")
       let length = Array.length(rowArr)
       let coord = x < length ? x : x - length
@@ -24,7 +24,10 @@ module Part02 = {
 
   let make = input => {
     deltas->Array.map(((deltaX, deltaY)) => {
-      input->Array.reduceWithIndex((0., (0, 0)), ((trees, (x, y)), row, index) => {
+      input->Js.String.split("\n", _)->Array.reduceWithIndex((0., (0, 0)), ((
+        trees,
+        (x, y),
+      ), row, index) => {
         let rowArr = Js.String2.split(row, "")
         let pos = rowArr[mod(x, Array.length(rowArr))]
 
