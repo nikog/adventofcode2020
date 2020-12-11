@@ -17,7 +17,9 @@ let adjacent = [
 ]
 
 let adjacentOccupied = (checkFn, map, Point(x, y)) => {
-  adjacent->Array.reduce(0, (sum, Point(dX, dY)) => sum + checkFn(map, Point(x, y), Point(dX, dY)))
+  adjacent->Array.reduce(0, (sum, Point(dX, dY)) => {
+    sum + checkFn(map, Point(x, y), Point(dX, dY))
+  })
 }
 
 let rec loopUntilSeated = (checkFn, tolerance, map) => {
@@ -33,7 +35,9 @@ let rec loopUntilSeated = (checkFn, tolerance, map) => {
     })
   })
 
-  let hasNoChanges = newMap->Array.eq(map, (aRow, bRow) => aRow->Array.eq(bRow, (a, b) => a == b))
+  let hasNoChanges = newMap->Array.eq(map, (aRow, bRow) => {
+    aRow->Array.eq(bRow, (a, b) => a == b)
+  })
 
   switch hasNoChanges {
   | true => newMap
@@ -41,32 +45,38 @@ let rec loopUntilSeated = (checkFn, tolerance, map) => {
   }
 }
 
-exception Error
+exception InvalidCharacter
 let mapInput = input => {
-  input->Js.String2.split("\n")->Array.map(row => row->Js.String2.split("")->Array.map(str => {
-      switch str {
+  input->Js.String2.split("\n")->Array.map(row => {
+    row->Js.String2.split("")->Array.map(char => {
+      switch char {
       | "#" => OccupiedSeat
       | "L" => EmptySeat
       | "." => Floor
-      | _ => raise(Error)
+      | _ => raise(InvalidCharacter)
       }
-    }))
+    })
+  })
 }
 
 let countOccupied = map => {
-  map->Array.reduce(0, (sum, row) =>
-    sum + row->Array.reduce(0, (sum, pos) => sum + (pos == OccupiedSeat ? 1 : 0))
-  )
+  map->Array.reduce(0, (sum, row) => {
+    sum + row->Array.reduce(0, (sum, pos) => {
+      sum + (pos == OccupiedSeat ? 1 : 0)
+    })
+  })
 }
 
+let pointSum = (Point(ax, ay), Point(bx, by)) => Point(ax + bx, ay + by)
+
 module Part01 = {
-  let checkOccupied = (map, Point(x, y), Point(dX, dY)) => {
-    let pos = map[y + dY]->Option.flatMap(row => row[x + dX])
+  let checkOccupied = (map, current, delta) => {
+    let Point(x, y) = pointSum(current, delta)
+    let pos = map[y]->Option.flatMap(row => row[x])
 
     switch pos {
     | Some(pos) when pos == OccupiedSeat => 1
-    | Some(_)
-    | None => 0
+    | _ => 0
     }
   }
 
@@ -78,18 +88,14 @@ module Part01 = {
 }
 
 module Part02 = {
-  let rec canSeeOccupiedSeat = (map, Point(x, y), delta) => {
-    let Point(dX, dY) = delta
-    let nextPoint = Point(x + dX, y + dY)
-    let Point(x, y) = nextPoint
+  let rec canSeeOccupiedSeat = (map, current, delta) => {
+    let Point(x, y) = pointSum(current, delta)
     let pos = map[y]->Option.flatMap(row => row[x])
 
     switch pos {
-    | Some(pos) when pos == Floor => canSeeOccupiedSeat(map, nextPoint, delta)
+    | Some(pos) when pos == Floor => canSeeOccupiedSeat(map, Point(x, y), delta)
     | Some(pos) when pos == OccupiedSeat => 1
-    | Some(pos) when pos == EmptySeat => 0
-    | Some(_)
-    | None => 0
+    | _ => 0
     }
   }
 
